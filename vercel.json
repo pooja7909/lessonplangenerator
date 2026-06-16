@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/generate-lesson-plan",
+      "destination": "/api/generate-lesson-plan"
+    },
+    {
+      "source": "/api/rewrite-section",
+      "destination": "/api/rewrite-section"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
