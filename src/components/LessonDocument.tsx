@@ -15,6 +15,59 @@ import {
   ExternalLink
 } from "lucide-react";
 
+interface AutoResizeTextareaProps {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  className?: string;
+  rows?: number;
+  placeholder?: string;
+  title?: string;
+}
+
+const AutoResizeTextarea: React.FC<AutoResizeTextareaProps> = ({ 
+  value, 
+  onChange, 
+  className = "", 
+  rows = 1,
+  placeholder,
+  title,
+  ...props 
+}) => {
+  const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+
+  const adjustHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  React.useEffect(() => {
+    adjustHeight();
+  }, [value]);
+
+  React.useEffect(() => {
+    window.addEventListener("resize", adjustHeight);
+    return () => {
+      window.removeEventListener("resize", adjustHeight);
+    };
+  }, []);
+
+  return (
+    <textarea
+      ref={textareaRef}
+      value={value}
+      onChange={onChange}
+      rows={rows}
+      placeholder={placeholder}
+      title={title}
+      className={`resize-none overflow-hidden bg-transparent focus:bg-white w-full rounded focus:ring-1 focus:ring-slate-300 outline-none transition py-1 px-1.5 ${className}`}
+      {...props}
+    />
+  );
+};
+
 interface LessonDocumentProps {
   plan: LessonPlan;
   onUpdate: (updatedPlan: LessonPlan) => void;
@@ -706,11 +759,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               </div>
               
               <div className="group/topic relative">
-                <input
-                  type="text"
+                <AutoResizeTextarea
                   value={plan.topic}
                   onChange={(e) => handleMetaChange("topic", e.target.value)}
-                  className="w-full text-2xl md:text-3xl font-bold tracking-tight text-slate-800 outline-none focus:bg-slate-50 rounded py-1 px-1 border border-transparent focus:border-slate-200 mt-1 leading-tight pr-10"
+                  className="w-full text-2xl md:text-3xl font-bold tracking-tight text-slate-800 outline-none focus:bg-slate-50 border border-transparent focus:border-slate-200 mt-1 leading-tight pr-10 !py-1 !px-1"
                   title="Click to edit Topic"
                 />
                 <button
@@ -731,11 +783,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               </div>
 
               <div className="group/subtopic relative mt-1">
-                <input
-                  type="text"
+                <AutoResizeTextarea
                   value={plan.subTopic}
                   onChange={(e) => handleMetaChange("subTopic", e.target.value)}
-                  className="w-full text-base text-slate-550 outline-none focus:bg-slate-50 rounded py-0.5 px-1 border border-transparent focus:border-slate-150 pr-10"
+                  className="w-full text-base text-slate-550 outline-none focus:bg-slate-50 border border-transparent focus:border-slate-150 pr-10 !py-0.5 !px-1"
                   title="Click to edit Sub-Topic"
                 />
                 <button
@@ -785,20 +836,18 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-slate-100 text-xs">
             <div>
               <span className="text-[10px] text-slate-400 block font-mono uppercase">Subject Area</span>
-              <input
-                type="text"
+              <AutoResizeTextarea
                 value={plan.subject}
                 onChange={(e) => handleMetaChange("subject", e.target.value)}
-                className="font-semibold text-slate-700 bg-transparent border-b border-transparent focus:border-slate-200 outline-none py-0.5 w-full focus:bg-slate-50 rounded px-1"
+                className="font-semibold text-slate-700 bg-transparent border-b border-transparent focus:border-slate-200 outline-none w-full focus:bg-slate-50 rounded !py-0.5 !px-1"
               />
             </div>
             <div>
               <span className="text-[10px] text-slate-400 block font-mono uppercase">Year Group</span>
-              <input
-                type="text"
+              <AutoResizeTextarea
                 value={plan.yearGroup}
                 onChange={(e) => handleMetaChange("yearGroup", e.target.value)}
-                className="font-semibold text-slate-700 bg-transparent border-b border-transparent focus:border-slate-200 outline-none py-0.5 w-full focus:bg-slate-50 rounded px-1"
+                className="font-semibold text-slate-700 bg-transparent border-b border-transparent focus:border-slate-200 outline-none w-full focus:bg-slate-50 rounded !py-0.5 !px-1"
               />
             </div>
             <div>
@@ -833,11 +882,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               {plan.learningObjectives.map((obj, idx) => (
                 <div key={idx} className="flex items-start gap-2.5 group/item">
                   <span className="text-slate-400 select-none font-bold pt-1 text-sm">•</span>
-                  <input
-                    type="text"
+                  <AutoResizeTextarea
                     value={obj}
                     onChange={(e) => handleUpdateList("learningObjectives", idx, e.target.value)}
-                    className="w-full text-slate-700 bg-transparent focus:bg-white leading-relaxed text-xs focus:ring-1 focus:ring-slate-300 py-1 px-1.5 rounded outline-none transition"
+                    className="text-slate-700 leading-relaxed text-xs focus:ring-slate-300"
                     placeholder="Enter learning objective"
                   />
                   <button
@@ -885,11 +933,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               {plan.successCriteria.map((crit, idx) => (
                 <div key={idx} className="flex items-start gap-2.5 group/item">
                   <span className="text-slate-400 select-none font-bold pt-1 text-sm">•</span>
-                  <input
-                    type="text"
+                  <AutoResizeTextarea
                     value={crit}
                     onChange={(e) => handleUpdateList("successCriteria", idx, e.target.value)}
-                    className="w-full text-slate-700 bg-transparent focus:bg-white leading-relaxed text-xs focus:ring-1 focus:ring-slate-300 py-1 px-1.5 rounded outline-none transition"
+                    className="text-slate-700 leading-relaxed text-xs focus:ring-slate-300"
                     placeholder="E.g. I can describe speed formulas..."
                   />
                   <button
@@ -938,11 +985,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
             {plan.resourcesAndMaterials.map((res, idx) => (
               <div key={idx} className="flex items-center gap-2 group/item">
                 <span className="text-slate-400 select-none font-bold text-sm">•</span>
-                <input
-                  type="text"
+                <AutoResizeTextarea
                   value={res}
                   onChange={(e) => handleUpdateList("resourcesAndMaterials", idx, e.target.value)}
-                  className="w-full text-slate-700 bg-transparent focus:bg-white text-xs focus:ring-1 focus:ring-slate-200 py-1 px-1.5 rounded outline-none transition"
+                  className="text-slate-700 text-xs focus:ring-slate-200"
                   placeholder="Enter lab resource or slide package"
                 />
                 <button
@@ -1011,19 +1057,17 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
                 {plan.lessonActivities.map((act, idx) => (
                   <tr key={idx} className="group/row hover:bg-slate-50/40 transition">
                     <td className="p-1 border-r border-slate-150">
-                      <input
-                        type="text"
+                      <AutoResizeTextarea
                         value={act.activity}
                         onChange={(e) => handleUpdateActivity(idx, "activity", e.target.value)}
-                        className="w-full bg-transparent font-medium text-slate-700 py-1.5 px-2 rounded outline-none focus:bg-white focus:ring-1 focus:ring-slate-300 text-xs"
+                        className="font-medium text-slate-700 text-xs !py-1.5 !px-2"
                       />
                     </td>
                     <td className="p-1 border-r border-slate-150">
-                      <input
-                        type="text"
+                      <AutoResizeTextarea
                         value={act.strategy}
                         onChange={(e) => handleUpdateActivity(idx, "strategy", e.target.value)}
-                        className="w-full bg-transparent text-slate-600 py-1.5 px-2 rounded outline-none focus:bg-white focus:ring-1 focus:ring-slate-300 text-xs"
+                        className="text-slate-600 text-xs !py-1.5 !px-2"
                       />
                     </td>
                     <td className="p-1 border-r border-slate-150 text-center">
@@ -1165,11 +1209,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
 
               {/* Title Input (Click to edit) */}
               <div className="group/rtitle relative max-w-sm">
-                <input
-                  type="text"
+                <AutoResizeTextarea
                   value={plan.thinkingRoutine.title}
                   onChange={(e) => handleUpdateRoutine("title", e.target.value)}
-                  className="w-full text-sm font-bold text-slate-800 bg-transparent py-1 px-1.5 focus:bg-white rounded border border-transparent focus:border-slate-200 outline-none pr-8"
+                  className="w-full text-sm font-bold text-slate-800 bg-transparent pr-8 !py-1 !px-1.5 focus:bg-white rounded border border-transparent focus:border-slate-200 outline-none"
                   title="Routine Title - Click to change"
                 />
                 <button
@@ -1192,11 +1235,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
 
               {/* Description Input (Click to edit) */}
               <div className="group/rdesc relative mt-1.5">
-                <textarea
-                  rows={2}
+                <AutoResizeTextarea
                   value={plan.thinkingRoutine.description}
                   onChange={(e) => handleUpdateRoutine("description", e.target.value)}
-                  className="w-full text-xs text-slate-500 bg-transparent py-1 px-1.5 focus:bg-white rounded border border-transparent focus:border-slate-200 outline-none resize-none pr-8 italic leading-relaxed"
+                  className="w-full text-xs text-slate-500 bg-transparent pr-8 italic leading-relaxed !py-1 !px-1.5 focus:bg-white rounded border border-transparent focus:border-slate-200 outline-none"
                   title="Teacher execution instructions - Click to edit"
                   placeholder="Analyze an image, object, or live demonstration to trigger observant predictions..."
                 />
@@ -1223,11 +1265,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
                 {plan.thinkingRoutine.prompts.map((p, pIdx) => (
                   <div key={pIdx} className="bg-white border border-slate-150 p-3.5 rounded-lg shadow-2xs relative group/pt flex flex-col space-y-1.5 hover:border-slate-250 transition duration-150">
                     <span className="text-[9px] font-mono font-semibold text-slate-400 uppercase tracking-wider block">Prompt Step {pIdx + 1}:</span>
-                    <textarea
-                      rows={3}
+                    <AutoResizeTextarea
                       value={p}
                       onChange={(e) => handleUpdateRoutinePrompt(pIdx, e.target.value)}
-                      className="w-full bg-transparent text-slate-700 focus:bg-slate-50/50 outline-none text-xs leading-relaxed font-semibold transition resize-none p-1 rounded"
+                      className="w-full bg-transparent text-slate-700 outline-none text-xs leading-relaxed font-semibold transition !p-1 rounded focus:bg-slate-50/50"
                       placeholder={`Enter prompt ${pIdx + 1}`}
                     />
                     <div className="flex justify-between items-center print:hidden pt-2 border-t border-slate-100 mt-auto opacity-0 group-hover/pt:opacity-100 transition duration-150">
@@ -1297,11 +1338,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               {plan.assessment.formative.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-2 group/item">
                   <span className="text-slate-400 select-none font-bold pt-1 text-sm">•</span>
-                  <input
-                    type="text"
+                  <AutoResizeTextarea
                     value={item}
                     onChange={(e) => handleUpdateAssessment("formative", idx, e.target.value)}
-                    className="w-full text-slate-700 bg-transparent focus:bg-white text-xs focus:ring-1 focus:ring-slate-300 py-1 px-1.5 rounded outline-none transition"
+                    className="text-slate-700 text-xs focus:ring-slate-300"
                   />
                   <button
                     onClick={() => {
@@ -1340,11 +1380,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               {plan.assessment.summative.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-2 group/item">
                   <span className="text-slate-400 select-none font-bold pt-1 text-sm">•</span>
-                  <input
-                    type="text"
+                  <AutoResizeTextarea
                     value={item}
                     onChange={(e) => handleUpdateAssessment("summative", idx, e.target.value)}
-                    className="w-full text-slate-700 bg-transparent focus:bg-white text-xs focus:ring-1 focus:ring-slate-300 py-1 px-1.5 rounded outline-none transition"
+                    className="text-slate-700 text-xs focus:ring-slate-300"
                   />
                   <button
                     onClick={() => {
@@ -1389,11 +1428,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               {plan.differentiationInclusion.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-2.5 group/item">
                   <span className="text-slate-400 select-none font-bold pt-1 text-sm">•</span>
-                  <input
-                    type="text"
+                  <AutoResizeTextarea
                     value={item}
                     onChange={(e) => handleUpdateList("differentiationInclusion", idx, e.target.value)}
-                    className="w-full text-slate-700 bg-transparent focus:bg-white leading-relaxed text-xs focus:ring-1 focus:ring-slate-300 py-1 px-1.5 rounded outline-none transition"
+                    className="text-slate-700 leading-relaxed text-xs focus:ring-slate-300"
                   />
                   <button
                     onClick={() => {
@@ -1442,11 +1480,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               {plan.crossCurricularLinks.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-2.5 group/item">
                   <span className="text-slate-400 select-none font-bold pt-1 text-sm">•</span>
-                  <input
-                    type="text"
+                  <AutoResizeTextarea
                     value={item}
                     onChange={(e) => handleUpdateList("crossCurricularLinks", idx, e.target.value)}
-                    className="w-full text-slate-700 bg-transparent focus:bg-white leading-relaxed text-xs focus:ring-1 focus:ring-slate-300 py-1 px-1.5 rounded outline-none transition"
+                    className="text-slate-700 leading-relaxed text-xs focus:ring-slate-300"
                   />
                   <button
                     onClick={() => {
@@ -1494,11 +1531,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               {plan.homeworkExtension.homework.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-2 group/item">
                   <span className="text-slate-400 select-none font-bold pt-1 text-sm">•</span>
-                  <input
-                    type="text"
+                  <AutoResizeTextarea
                     value={item}
                     onChange={(e) => handleUpdateHomework("homework", idx, e.target.value)}
-                    className="w-full text-slate-700 bg-transparent focus:bg-white text-xs focus:ring-1 focus:ring-slate-300 py-1 px-1.5 rounded outline-none transition"
+                    className="text-slate-700 text-xs focus:ring-slate-300"
                   />
                   <button
                     onClick={() => {
@@ -1537,11 +1573,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               {plan.homeworkExtension.extension.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-2 group/item">
                   <span className="text-slate-400 select-none font-bold pt-1 text-sm">•</span>
-                  <input
-                    type="text"
+                  <AutoResizeTextarea
                     value={item}
                     onChange={(e) => handleUpdateHomework("extension", idx, e.target.value)}
-                    className="w-full text-slate-700 bg-transparent focus:bg-white text-xs focus:ring-1 focus:ring-slate-300 py-1 px-1.5 rounded outline-none transition"
+                    className="text-slate-700 text-xs focus:ring-slate-300"
                   />
                   <button
                     onClick={() => {
@@ -1556,7 +1591,7 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
                     className="opacity-0 group-hover/item:opacity-100 p-0.5 text-slate-400 hover:text-slate-700 rounded cursor-pointer print:hidden transition mr-0.5"
                     title="Rewrite Extension"
                   >
-                    <Sparkles className="w-3 h-3 hover:text-yellow-500" />
+                    <Sparkles className="w-3 h-3 hover:text-yellow-550" />
                   </button>
                   <button
                     onClick={() => handleDeleteHomework("extension", idx)}
@@ -1591,11 +1626,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               {plan.reflectionQuestions.whatWentWell.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-1 group/item">
                   <span className="text-slate-400 pt-1 select-none font-bold text-xs">•</span>
-                  <textarea
-                    rows={2}
+                  <AutoResizeTextarea
                     value={item}
                     onChange={(e) => handleUpdateReflection("whatWentWell", idx, e.target.value)}
-                    className="w-full leading-relaxed text-slate-700 bg-transparent focus:bg-white text-xs focus:ring-1 focus:ring-slate-300 p-1 rounded outline-none transition resize-none"
+                    className="leading-relaxed text-slate-700 text-xs focus:ring-slate-300"
                   />
                   <button
                     onClick={() => {
@@ -1622,7 +1656,7 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               ))}
               <button
                 onClick={() => handleAddReflection("whatWentWell")}
-                className="text-[9px] text-slate-450 hover:text-slate-650 font-semibold flex items-center gap-1 cursor-pointer print:hidden"
+                className="text-[9px] text-slate-455 hover:text-slate-655 font-semibold flex items-center gap-1 cursor-pointer print:hidden"
               >
                 <Plus className="w-2.5 h-2.5" /> Log positive note
               </button>
@@ -1634,11 +1668,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               {plan.reflectionQuestions.challenges.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-1 group/item">
                   <span className="text-slate-400 pt-1 select-none font-bold text-xs">•</span>
-                  <textarea
-                    rows={2}
+                  <AutoResizeTextarea
                     value={item}
                     onChange={(e) => handleUpdateReflection("challenges", idx, e.target.value)}
-                    className="w-full leading-relaxed text-slate-600 bg-transparent focus:bg-white text-xs focus:ring-1 focus:ring-slate-300 p-1 rounded outline-none transition resize-none"
+                    className="leading-relaxed text-slate-600 text-xs focus:ring-slate-300"
                   />
                   <button
                     onClick={() => {
@@ -1665,7 +1698,7 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               ))}
               <button
                 onClick={() => handleAddReflection("challenges")}
-                className="text-[9px] text-slate-450 hover:text-slate-650 font-semibold flex items-center gap-1 cursor-pointer print:hidden"
+                className="text-[9px] text-slate-455 hover:text-slate-655 font-semibold flex items-center gap-1 cursor-pointer print:hidden"
               >
                 <Plus className="w-2.5 h-2.5" /> Log difficulty
               </button>
@@ -1677,11 +1710,10 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               {plan.reflectionQuestions.nextTime.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-1 group/item">
                   <span className="text-slate-400 pt-1 select-none font-bold text-xs">•</span>
-                  <textarea
-                    rows={2}
+                  <AutoResizeTextarea
                     value={item}
                     onChange={(e) => handleUpdateReflection("nextTime", idx, e.target.value)}
-                    className="w-full leading-relaxed text-slate-650 bg-transparent focus:bg-white text-xs focus:ring-1 focus:ring-slate-300 p-1 rounded outline-none transition resize-none"
+                    className="leading-relaxed text-slate-650 text-xs focus:ring-slate-300"
                   />
                   <button
                     onClick={() => {
@@ -1708,7 +1740,7 @@ ${plan.reflectionQuestions.nextTime.map(n => `- ${n}`).join("\n")}
               ))}
               <button
                 onClick={() => handleAddReflection("nextTime")}
-                className="text-[9px] text-slate-450 hover:text-slate-650 font-semibold flex items-center gap-1 cursor-pointer print:hidden"
+                className="text-[9px] text-slate-455 hover:text-slate-655 font-semibold flex items-center gap-1 cursor-pointer print:hidden"
               >
                 <Plus className="w-2.5 h-2.5" /> Log modification plan
               </button>
